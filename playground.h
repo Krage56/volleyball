@@ -6,27 +6,20 @@
 #include <QKeyEvent>
 #include <iostream>
 #include <playgrounditems.h>
+#include <QTimerEvent>
 
 class Playground : public QGraphicsView
 {
     public:
         Playground(QWidget* parent = 0);
         void keyPressEvent(QKeyEvent *event);
+        void timerEvent(QTimerEvent*event){Q_UNUSED(event);};
         bool borderCollision(QGraphicsItem*)const;
         ~Playground()=default;
     private:
         QGraphicsScene _scene;
-        Rect* _leftRect;
-        Rect* _rightRect;
-        enum BorderKinds{
-            top = 0,
-            left = 1,
-            bottom = 2,
-            right = 3,
-            none = 4
-        };
-        QMap<BorderKinds, BorderLine*> _borders;
-
+        Platform* _leftRect;
+        Platform* _rightRect;
 };
 
 #endif // PLAYGROUND_H
