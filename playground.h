@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
-#include <iostream>
+#include <QVector>
 #include <playgrounditems.h>
 #include <QTimerEvent>
 
@@ -13,13 +13,15 @@ class Playground : public QGraphicsView
     public:
         Playground(QWidget* parent = 0);
         void keyPressEvent(QKeyEvent *event);
-        void timerEvent(QTimerEvent*event){Q_UNUSED(event);};
-        bool borderCollision(QGraphicsItem*)const;
+        void timerEvent(QTimerEvent*event);
+        QVector<BorderLine*> getBorders()const{return _borders;}
         ~Playground()=default;
     private:
         QGraphicsScene _scene;
-        Platform* _leftRect;
-        Platform* _rightRect;
+        Platform* _leftPlatform;
+        Platform* _rightPlatform;
+        GeneralRect* _volleyballNet;
+        QVector<BorderLine*> _borders;
 };
 
 #endif // PLAYGROUND_H

@@ -51,3 +51,15 @@ BorderLine::BorderLine(std::pair<qreal, qreal> p1, std::pair<qreal, qreal> p2, B
 QPointF BorderLine::getPointF()const{
     return QPointF(x(), y());
 }
+
+
+void Platform::collisionBehavior(const QVector<BorderLine*>& borders, const GeneralRect* net){
+    for(int i = 0; i < borders.size(); ++i){
+        if(collidesWithItem(borders[i])){
+            _colliedBorders[i] = true;
+        }
+        else{
+            _colliedBorders[i] = false;
+        }
+    }
+}
