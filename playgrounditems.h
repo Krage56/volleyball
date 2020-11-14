@@ -10,9 +10,12 @@
 
 class GeneralRect: public QGraphicsRectItem{
     QPoint _centerPos;
+    int _w, _h;
     public:
         GeneralRect(const QPoint& p, int w, int h,
                     const QPen& pen, const QBrush& brush);
+        int w()const{return _w;};
+        int h()const{return _h;};
         virtual QPointF getCoords()const{return _centerPos;};
         virtual ~GeneralRect()=default;
 
@@ -40,6 +43,8 @@ class Platform : public GeneralRect{
         QPointF getCoords()const override;
         void setCoords(const std::pair<qreal, qreal>& p);
         void setCoords(const QPointF&);
+        bool moveAcces(int key, const QPointF& currentPos, int top,
+                       int left, int bottom, int right, int step = 15)const;
         void collisionBehavior(const QVector<BorderLine*>& borders,
                                const GeneralRect* net = nullptr);
         bool leftBorderCol()const{return _colliedBorders[static_cast<int>(Borders::left)];}

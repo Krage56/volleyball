@@ -47,45 +47,73 @@ Playground::Playground(QWidget* parent)
 }
 
 void Playground::keyPressEvent(QKeyEvent *e){
-    const int step = 30,
+    const int step = 15,
     bottom = _scene.sceneRect().bottom(),
-    top = _scene.sceneRect().top(), /*top := 0*/
-    left = 0,
+    top = _scene.sceneRect().top();
+    int left = 0,
     right = _scene.sceneRect().right();
-    if((e->key() == Qt::Key_W || e->key() == 1062) && _leftPlatform->getCoords().y() - step >= top){
-        auto current_coords = _leftPlatform->getCoords();
-        _leftPlatform->setCoords(std::make_pair(current_coords.x(),current_coords.y()-step));
+
+    if((e->key() == Qt::Key_W || e->key() == 1062)){
+        QPointF currentCoords = _leftPlatform->getCoords();
+
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _leftPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()-step));
     }
-    if((e->key() == Qt::Key_S || e->key() == 1067) && _leftPlatform->getCoords().y() + step <= bottom){
-        auto current_coords = _leftPlatform->getCoords();
-        _leftPlatform->setCoords(std::make_pair(current_coords.x(),current_coords.y()+step));
+    if((e->key() == Qt::Key_S || e->key() == 1067)){
+        QPointF currentCoords = _leftPlatform->getCoords();
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _leftPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()+step));
     }
-    if((e->key() == Qt::Key_D || e->key() == 1042) && _leftPlatform->getCoords().x() + step <= right){
-        auto current_coords = _leftPlatform->getCoords();
-        _leftPlatform->setCoords(std::make_pair(current_coords.x()+step,current_coords.y()));
+    if((e->key() == Qt::Key_D || e->key() == 1042)){
+        QPointF currentCoords = _leftPlatform->getCoords();
+        right = _volleyballNet->getCoords().x() - _volleyballNet->w()/2;
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _leftPlatform->setCoords(std::make_pair(currentCoords.x()+step,currentCoords.y()));
     }
     if(e->key() == Qt::Key_A || e->key() == 1060){
-        auto current_coords = _leftPlatform->getCoords();
-        _leftPlatform->setCoords(std::make_pair(current_coords.x()-step,current_coords.y()));
+        QPointF currentCoords = _leftPlatform->getCoords();
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _leftPlatform->setCoords(std::make_pair(currentCoords.x()-step,currentCoords.y()));
     }
 
 
     if(e->key() == Qt::Key_Up){
-        auto current_coords = _rightPlatform->getCoords();
-        _rightPlatform->setCoords(std::make_pair(current_coords.x(),current_coords.y()-step));
+        QPointF currentCoords = _rightPlatform->getCoords();
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _rightPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()-step));
 
     }
     if(e->key() == Qt::Key_Down){
-        auto current_coords = _rightPlatform->getCoords();
-        _rightPlatform->setCoords(std::make_pair(current_coords.x(),current_coords.y()+step));
+        QPointF currentCoords = _rightPlatform->getCoords();
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _rightPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()+step));
     }
     if(e->key() == Qt::Key_Left){
-        auto current_coords = _rightPlatform->getCoords();
-        _rightPlatform->setCoords(std::make_pair(current_coords.x()-step,current_coords.y()));
+        QPointF currentCoords = _rightPlatform->getCoords();
+        left = _volleyballNet->getCoords().x() + _volleyballNet->w()/2;
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _rightPlatform->setCoords(std::make_pair(currentCoords.x()-step,currentCoords.y()));
     }
     if(e->key() == Qt::Key_Right){
-        auto current_coords = _rightPlatform->getCoords();
-        _rightPlatform->setCoords(std::make_pair(current_coords.x()+step,current_coords.y()));
+        QPointF currentCoords = _rightPlatform->getCoords();
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+            return;
+        }
+        _rightPlatform->setCoords(std::make_pair(currentCoords.x()+step,currentCoords.y()));
     }
 }
 

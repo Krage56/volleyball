@@ -13,6 +13,8 @@ GeneralRect::GeneralRect(const QPoint& p, int w, int h,
     setBrush(brush);
     setPos(p);
     _centerPos = p;
+    _w = w;
+    _h = h;
 }
 
 
@@ -52,6 +54,30 @@ QPointF BorderLine::getPointF()const{
     return QPointF(x(), y());
 }
 
+bool Platform::moveAcces(int key, const QPointF& currentCoords, int top,
+                         int left, int bottom, int right, int step)const{
+    if((key == Qt::Key_W || key == 1062) || (key == Qt::Key_Up)){
+        if(currentCoords.y() - step - h()/2 < top){
+            return false;
+        }
+    }
+    if((key == Qt::Key_S || key == 1067) || (key == Qt::Key::Key_Down)){
+        if(currentCoords.y() + step + h()/2 > bottom){
+            return false;
+        }
+    }
+    if((key == Qt::Key_D || key == 1042) || (key == Qt::Key_Right)){
+        if(currentCoords.x() + step + w()/2 > right){
+            return false;
+        }
+    }
+    if(key == Qt::Key_A || key == 1060 || (key == Qt::Key_Left)){
+        if(currentCoords.x() - step - w()/2 < left){
+            return false;
+        }
+    }
+    return true;
+}
 
 void Platform::collisionBehavior(const QVector<BorderLine*>& borders, const GeneralRect* net){
     for(int i = 0; i < borders.size(); ++i){
