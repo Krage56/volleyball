@@ -1,6 +1,7 @@
 #include "playground.h"
 #include "playgrounditems.h"
 #include <iostream>
+#include <cmath>
 Playground::Playground(QWidget* parent)
     : QGraphicsView(parent)
     , _scene(this)
@@ -42,8 +43,11 @@ Playground::Playground(QWidget* parent)
                                             _scene.sceneRect().top()+(height-_volleyballNetH/2)),
                                      _volleyballNetW, _volleyballNetH, QPen(Qt::black), QBrush(Qt::black));
     _scene.addItem(_volleyballNet);
+    Ball* ball = new Ball(width/2, _scene.sceneRect().top()+50, 30);
+    _scene.addItem(ball);
+    _ball = ball;
 //    std::cout <<  _volleyballNet->getCoords().x()<< std::flush;
-    startTimer(50);
+    startTimer(30);
 }
 
 void Playground::keyPressEvent(QKeyEvent *e){
@@ -120,6 +124,79 @@ void Playground::keyPressEvent(QKeyEvent *e){
 
 void Playground::timerEvent(QTimerEvent* event){
     Q_UNUSED(event);
-    _leftPlatform->collisionBehavior(_borders);
-    _rightPlatform->collisionBehavior(_borders);
+    //координаты центра окружности при следующей отрисовке
+
+    QList<QGraphicsItem*> collideWith = _ball->collidingItems();
+    for(auto* c_item: collideWith){
+        GeneralRect* rect = dynamic_cast<GeneralRect*>(c_item);
+        if(!rect){
+            BorderLine* borderCollied = dynamic_cast<BorderLine*>(c_item);
+            if(borderCollied &&
+                (borderCollied->getKind() == Borders::bottom ||
+                 borderCollied->getKind() == Borders::top)){
+                _ball->setVec(V2(_ball->getVec().x(), _ball->getVec().y()*(-1)));
+            }
+            else if(borderCollied &&
+                    (borderCollied->getKind() == Borders::left ||
+                     borderCollied->getKind() == Borders::right)){
+                _ball->setVec(V2(_ball->getVec().x()*(-1), _ball->getVec().y()));
+            }
+        }
+        else{
+            if(rect && dynamic_cast<Platform*>(rect)){
+                QPointF pCenter = rect->getCoords();
+                QPointF bCenter = _ball->getCoords();
+                V2* newV = new V2((bCenter.x()-pCenter.x()), (bCenter.y()-pCenter.y()));
+                if(_ball->getVec().operator bool()){
+                    newV->normalize();
+                    (*newV) = (*newV) * _ball->getVec().len();
+                    _ball->setVec(newV);
+                }
+            }
+        }
+    }
+
+//    bool velocityChanged = false;
+//    double oldLen = _ball->getVec().len();
+//    if(dest.x() - _ball->r() < 0){
+//        double distX = 0, distY = 0;
+//        distX = _ball->getCoords().x();
+//        distY = sqrt(pow(_ball->getVec().len()/_ball->getVec().x(), 2) - 1) * distX;
+//        velocityChanged = true;
+//        _ball->setVec(V2(distX, distY));
+//    }
+//    else if(dest.y()/* - _ball->r()/oldLen*/ < 0){
+//        double distX = 0, distY = 0;
+//        distY = _ball->getCoords().y();
+//        distX = sqrt(pow(_ball->getVec().len()/_ball->getVec().y(), 2) - 1) * distY;
+//        velocityChanged = true;
+//        _ball->setVec(V2(distX, distY));
+//    }
+    QPointF dest(_ball->getCoords().x()+_ball->getVec().x(),
+                 _ball->getCoords().y()+_ball->getVec().y());
+    double oldLen = _ball->getVec().len();
+    bool vectorChanged = false;
+    if(dest.x() - _ball->r() < 0){
+        //служебная величина, нужна для построения коррекции
+        double dLen = sqrt(pow((_ball->getCoords().x()-dest.x()), 2)+pow((_ball->getCoords().y()-dest.y()), 2));
+        //определяет, на сколько шар выкатился из гулага
+        double delta = _ball->getCoords().x()-_ball->r();
+        //коррекция - на сколько нужно откатить шарик назад по заданному направлению
+        double correction = dLen * (delta / _ball->r());
+        if(_ball->getVec().operator bool()){
+            _ball->setVec(_ball->getVec().normalize()*(correction));
+            if(qFuzzyCompare(correction, 0)){
+                _ball->setVec(V2(1,6));
+            }
+            vectorChanged = true;
+        }
+        std::cout << correction << std::endl << std::flush;
+    }
+    _ball->move();
+    if(vectorChanged && _ball->getVec().operator bool())
+        _ball->setVec(_ball->getVec().normalize()*oldLen);
+
+//    if(velocityChanged){
+//        _ball->setVec(_ball->getVec().normalize()*oldLen);
+//    }
 }

@@ -11,11 +11,13 @@ CONFIG += c++14
 SOURCES += \
     main.cpp \
     playground.cpp \
-    playgrounditems.cpp
+    playgrounditems.cpp \
+    v2.cpp
 
 HEADERS += \
     playground.h \
-    playgrounditems.h
+    playgrounditems.h \
+    v2.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

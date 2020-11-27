@@ -22,6 +22,7 @@ class Playground : public QGraphicsView
         Platform* _rightPlatform;
         GeneralRect* _volleyballNet;
         QVector<BorderLine*> _borders;
+        Ball* _ball;
 };
 
 #endif // PLAYGROUND_H
