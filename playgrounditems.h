@@ -4,8 +4,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
-#include <QVector>
-#include <iostream>
+#include <list>
+#include "v2.h"
 
 
 class GeneralRect: public QGraphicsRectItem{
@@ -55,5 +55,25 @@ class Platform : public GeneralRect{
         ~Platform()=default;
 };
 
+class Ball: public QGraphicsEllipseItem{
+    int _r;
+    double _x, _y;
+    std::list<V2*> _impulses;
+    public:
+        //Принимает координаты центра мячика и его радиус
+        Ball(double x, double y, double r);
+        //двигает мячик на 1 такт
+        void move();
+        /*После перерисовки со взаимодействием объектов
+        очищает список действующих импульсов.
+        Если на объект никто не подействовал, то и действующие
+        на него импульсы не изменились*/
+        void cleanImpulses();
+        ~Ball();
+    protected:
+        //Обёртка над setPos()
+        void setPosition(double x, double y);
+
+};
 
 #endif // PLAYGROUNDITEMS_H

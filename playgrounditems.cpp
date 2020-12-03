@@ -1,7 +1,9 @@
 #include "playgrounditems.h"
 #include "playground.h"
 #include <iostream>
-
+#include <ctime>
+#include <cstdlib>
+#include <cmath>
 
 GeneralRect::GeneralRect(const QPoint& p, int w, int h,
                          const QPen& pen, const QBrush& brush):
@@ -89,3 +91,44 @@ void Platform::collisionBehavior(const QVector<BorderLine*>& borders, const Gene
         }
     }
 }
+
+Ball::Ball(double x, double y, double r):
+    QGraphicsEllipseItem(-r, -r, 2*r, 2*r)
+{
+    _r = r;
+    _x = x;
+    _y = y;
+    setBrush(QColor(153,102,204));
+    setPos(x, y);
+    srand(time(0));
+    //определим вектор движения при появлении
+    //к кому из игроков полетит мяч в начале игры определяется случайно
+    _impulses.emplace_back(new V2(pow(-1, (rand() % 2)), 4));
+}
+
+
+Ball::~Ball(){
+    cleanImpulses();
+}
+
+void Ball::setPosition(double x, double y){
+    setPos(x, y);
+}
+
+void Ball::cleanImpulses(){
+    for(auto* item: _impulses){
+        delete item;
+        item = nullptr;
+    }
+}
+
+void Ball::move(){
+    V2 resulted;
+    for(auto* item: _impulses){
+        resulted = resulted + *item;
+    }
+    _x += resulted.x();
+    _y += resulted.y();
+    setPosition(_x,  _y);
+}
+
