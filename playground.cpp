@@ -37,8 +37,8 @@ Playground::Playground(QWidget* parent)
         _scene.addItem(el);
     }
 
-
     const int _volleyballNetH = 450, _volleyballNetW = 20;
+
     _volleyballNet = new GeneralRect(QPoint(_scene.sceneRect().center().x(),
                                             _scene.sceneRect().top()+(height-_volleyballNetH/2)),
                                      _volleyballNetW, _volleyballNetH, QPen(Qt::black), QBrush(Qt::black));
@@ -46,8 +46,8 @@ Playground::Playground(QWidget* parent)
     Ball* ball = new Ball(width/2, _scene.sceneRect().top()+50, 30);
     _scene.addItem(ball);
     _ball = ball;
-//    std::cout <<  _volleyballNet->getCoords().x()<< std::flush;
-    startTimer(30);
+    //std::cout << _volleyballNet->getCoords().x() << std::flush;
+    startTimer(50);
 }
 
 void Playground::keyPressEvent(QKeyEvent *e){
@@ -56,18 +56,18 @@ void Playground::keyPressEvent(QKeyEvent *e){
     top = _scene.sceneRect().top();
     int left = 0,
     right = _scene.sceneRect().right();
-
+    //std::cout << "I was in key event\n" << std::flush;
     if((e->key() == Qt::Key_W || e->key() == 1062)){
         QPointF currentCoords = _leftPlatform->getCoords();
 
-        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _leftPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()-step));
     }
     if((e->key() == Qt::Key_S || e->key() == 1067)){
         QPointF currentCoords = _leftPlatform->getCoords();
-        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _leftPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()+step));
@@ -75,14 +75,14 @@ void Playground::keyPressEvent(QKeyEvent *e){
     if((e->key() == Qt::Key_D || e->key() == 1042)){
         QPointF currentCoords = _leftPlatform->getCoords();
         right = _volleyballNet->getCoords().x() - _volleyballNet->w()/2;
-        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _leftPlatform->setCoords(std::make_pair(currentCoords.x()+step,currentCoords.y()));
     }
     if(e->key() == Qt::Key_A || e->key() == 1060){
         QPointF currentCoords = _leftPlatform->getCoords();
-        if(!_leftPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_leftPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _leftPlatform->setCoords(std::make_pair(currentCoords.x()-step,currentCoords.y()));
@@ -91,7 +91,7 @@ void Playground::keyPressEvent(QKeyEvent *e){
 
     if(e->key() == Qt::Key_Up){
         QPointF currentCoords = _rightPlatform->getCoords();
-        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _rightPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()-step));
@@ -99,7 +99,7 @@ void Playground::keyPressEvent(QKeyEvent *e){
     }
     if(e->key() == Qt::Key_Down){
         QPointF currentCoords = _rightPlatform->getCoords();
-        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _rightPlatform->setCoords(std::make_pair(currentCoords.x(),currentCoords.y()+step));
@@ -107,14 +107,14 @@ void Playground::keyPressEvent(QKeyEvent *e){
     if(e->key() == Qt::Key_Left){
         QPointF currentCoords = _rightPlatform->getCoords();
         left = _volleyballNet->getCoords().x() + _volleyballNet->w()/2;
-        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _rightPlatform->setCoords(std::make_pair(currentCoords.x()-step,currentCoords.y()));
     }
     if(e->key() == Qt::Key_Right){
         QPointF currentCoords = _rightPlatform->getCoords();
-        if(!_rightPlatform->moveAcces(e->key(), currentCoords, top, left, bottom, right)){
+        if(!_rightPlatform->moveAcces(e->key(), currentCoords, _ball, top, left, bottom, right)){
             return;
         }
         _rightPlatform->setCoords(std::make_pair(currentCoords.x()+step,currentCoords.y()));
@@ -124,5 +124,43 @@ void Playground::keyPressEvent(QKeyEvent *e){
 
 void Playground::timerEvent(QTimerEvent* event){
     Q_UNUSED(event);
-    _ball->move();
+    QList<QGraphicsItem*> collideWith = _ball->collidingItems();
+    //Мяч взаимодействует соприкасается с одним объектом
+    if(collideWith.empty()){
+        _ball->move();
+    }
+    else if(collideWith.size() == 1){
+        GeneralRect* p1 = dynamic_cast<GeneralRect*>(*collideWith.begin());
+        BorderLine* p2 = dynamic_cast<BorderLine*>(*collideWith.begin());
+        if(p1){
+            _ball->collProcess(p1);
+        }
+        if(p2){
+            _ball->collProcess(p2);
+        }
+        _ball->move();
+    }
+//    if(_ball->getVec().operator bool()){
+//        std::cout << "Velocity is lost\n" << std::flush;
+//    }
+    else{
+        bool isInteracting = false;
+        for(auto* item: collideWith){
+            if(_ball->isInteracted(item)){
+                isInteracting = true;
+                GeneralRect* p1 = dynamic_cast<GeneralRect*>(item);
+                BorderLine* p2 = dynamic_cast<BorderLine*>(item);
+//                if(p1){
+//                    _ball->collProcess(p1);
+//                }
+                if(p2){
+                    _ball->collProcess(p2);
+                }
+                break;
+            }
+        }
+        if(!isInteracting){
+            _ball->move();
+        }
+    }
 }

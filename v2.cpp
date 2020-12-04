@@ -36,3 +36,8 @@ const V2& V2::normalize(){
      swap(res);
      return *this;
 }
+
+V2::V2(const V2& copyVec){
+    v[0] = copyVec.v[0];
+    v[1] = copyVec.v[1];
+}

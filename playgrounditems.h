@@ -4,7 +4,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
-#include <list>
 #include "v2.h"
 
 
@@ -28,6 +27,7 @@ enum class Borders{
 };
 class BorderLine: public QGraphicsLineItem{
     Borders _kind;
+    QPointF _centralPoint;
     public:
         BorderLine(std::pair<qreal, qreal>, std::pair<qreal, qreal>, Borders);
         QPointF getPointF()const;
@@ -35,45 +35,47 @@ class BorderLine: public QGraphicsLineItem{
         ~BorderLine()=default;
 };
 
-
-
-class Platform : public GeneralRect{
-    bool _colliedBorders[4];
-    public:
-        QPointF getCoords()const override;
-        void setCoords(const std::pair<qreal, qreal>& p);
-        void setCoords(const QPointF&);
-        bool moveAcces(int key, const QPointF& currentPos, int top,
-                       int left, int bottom, int right, int step = 15)const;
-        void collisionBehavior(const QVector<BorderLine*>& borders,
-                               const GeneralRect* net = nullptr);
-        bool leftBorderCol()const{return _colliedBorders[static_cast<int>(Borders::left)];}
-        bool rightBorderCol()const{return _colliedBorders[static_cast<int>(Borders::right)];}
-        bool topBorderCol()const{return _colliedBorders[static_cast<int>(Borders::top)];}
-        bool bottomBorderCol()const{return _colliedBorders[static_cast<int>(Borders::bottom)];};
-        Platform(const QPoint& p);
-        ~Platform()=default;
-};
-
 class Ball: public QGraphicsEllipseItem{
     int _r;
     double _x, _y;
-    std::list<V2*> _impulses;
+    V2* _currentVelocity;
     public:
         //Принимает координаты центра мячика и его радиус
         Ball(double x, double y, double r);
         //двигает мячик на 1 такт
         void move();
-        /*После перерисовки со взаимодействием объектов
-        очищает список действующих импульсов.
-        Если на объект никто не подействовал, то и действующие
-        на него импульсы не изменились*/
-        void cleanImpulses();
+        //Возвращает текущий вектор скорости
+        V2 getVec()const{return *_currentVelocity;}
+        //Возвращает позицию центра мяча на сцене
+        QPointF getPosition()const{return QPointF(_x, _y);}
+        //Меняют вектор движения для мяча после столкновения
+        V2 collProcess(GeneralRect* rect);
+        V2 collProcess(BorderLine* border);
+        //Возвращает радиус мячика
+        int r()const{return _r;}
+        //Взаимодействует ли данный объект с мячиком
+        //Гарантировано работает только для соприкасающихся объектов
+        bool isInteracted(QGraphicsItem* obj) const;
         ~Ball();
     protected:
         //Обёртка над setPos()
         void setPosition(double x, double y);
-
+        //задаёт вектор движения в обход обсчёта взаимодействий
+        void setVec(const V2& v){delete _currentVelocity; _currentVelocity = new V2(v);}
 };
+
+
+class Platform : public GeneralRect{
+    public:
+        QPointF getCoords()const override;
+        void setCoords(const std::pair<qreal, qreal>& p);
+        void setCoords(const QPointF&);
+        bool moveAcces(int key, const QPointF& currentPos, Ball* ball, int top,
+                       int left, int bottom, int right, int step = 15)const;
+        Platform(const QPoint& p);
+        ~Platform()=default;
+};
+
+
 
 #endif // PLAYGROUNDITEMS_H

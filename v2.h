@@ -8,6 +8,7 @@ private:
 public:
     V2();
     V2(double x, double y);
+    V2(const V2& copyVec);
 // coordinate accessors
     double& x() {return v[0];}
     double x() const {return v[0];}
