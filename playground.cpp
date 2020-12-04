@@ -2,6 +2,7 @@
 #include "playgrounditems.h"
 #include <iostream>
 #include <cmath>
+#include <QTest>
 Playground::Playground(QWidget* parent)
     : QGraphicsView(parent)
     , _scene(this)
@@ -27,6 +28,10 @@ Playground::Playground(QWidget* parent)
     _scene.addItem(_leftPlatform);
     _scene.addItem(_rightPlatform);
 
+    Ball* ball = new Ball(width/2, _scene.sceneRect().top()+50, 30);
+    _scene.addItem(ball);
+    _ball = ball;
+
     _borders.push_back(new BorderLine(std::make_pair(0,0), std::make_pair(_scene.width(), 0), Borders::top));
     _borders.push_back(new BorderLine(std::make_pair(0,_scene.height()), std::make_pair(0, 0), Borders::left));
     _borders.push_back(new BorderLine(std::make_pair(0,_scene.height()),
@@ -43,10 +48,9 @@ Playground::Playground(QWidget* parent)
                                             _scene.sceneRect().top()+(height-_volleyballNetH/2)),
                                      _volleyballNetW, _volleyballNetH, QPen(Qt::black), QBrush(Qt::black));
     _scene.addItem(_volleyballNet);
-    Ball* ball = new Ball(width/2, _scene.sceneRect().top()+50, 30);
-    _scene.addItem(ball);
-    _ball = ball;
+
     //std::cout << _volleyballNet->getCoords().x() << std::flush;
+    waiting = false;
     startTimer(50);
 }
 
@@ -124,7 +128,31 @@ void Playground::keyPressEvent(QKeyEvent *e){
 
 void Playground::timerEvent(QTimerEvent* event){
     Q_UNUSED(event);
+    if(waiting){
+        waiting = false;
+        QTest::qSleep(4000);
+        newGame();
+        return;
+    }
     QList<QGraphicsItem*> collideWith = _ball->collidingItems();
+    for(auto* item: collideWith){
+        BorderLine* p1 = dynamic_cast<BorderLine*>(item);
+        GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
+        if(p1){
+            if(!(p1->getKind() == Borders::top)){
+                gameOver();
+                return;
+            }
+        }
+        if(p2){
+            if(!dynamic_cast<Platform*>(item)){
+                if(_ball->getPosition().y() >= _scene.sceneRect().bottom() - p2->h()){
+                    gameOver();
+                    return;
+                }
+            }
+        }
+    }
     //Мяч взаимодействует соприкасается с одним объектом
     if(collideWith.empty()){
         _ball->move();
@@ -140,27 +168,33 @@ void Playground::timerEvent(QTimerEvent* event){
         }
         _ball->move();
     }
-//    if(_ball->getVec().operator bool()){
-//        std::cout << "Velocity is lost\n" << std::flush;
-//    }
-    else{
-        bool isInteracting = false;
-        for(auto* item: collideWith){
-            if(_ball->isInteracted(item)){
-                isInteracting = true;
-                GeneralRect* p1 = dynamic_cast<GeneralRect*>(item);
-                BorderLine* p2 = dynamic_cast<BorderLine*>(item);
-//                if(p1){
-//                    _ball->collProcess(p1);
-//                }
-                if(p2){
-                    _ball->collProcess(p2);
-                }
-                break;
-            }
-        }
-        if(!isInteracting){
-            _ball->move();
-        }
-    }
+
+}
+
+void Playground::gameOver(){
+    _scene.removeItem(_ball);
+    _scene.removeItem(_leftPlatform);
+    _scene.removeItem(_rightPlatform);
+    delete _ball;
+    delete _leftPlatform;
+    delete  _rightPlatform;
+    _ball = nullptr;
+    _leftPlatform = nullptr;
+    _rightPlatform = nullptr;
+    waiting = true;
+}
+
+void Playground::newGame(){
+    const QPoint leftRectPoint(150,_scene.sceneRect().bottomRight().y()/2),
+            rightRectPoint(_scene.sceneRect().bottomRight().x()-150,
+                           _scene.sceneRect().bottomRight().y()/2);
+
+    _leftPlatform = new Platform(leftRectPoint);
+    _rightPlatform = new Platform(rightRectPoint);
+    _scene.addItem(_leftPlatform);
+    _scene.addItem(_rightPlatform);
+
+    Ball* ball = new Ball(_scene.sceneRect().width()/2, _scene.sceneRect().top()+50, 30);
+    _scene.addItem(ball);
+    _ball = ball;
 }

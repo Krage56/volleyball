@@ -109,7 +109,7 @@ Ball::Ball(double x, double y, double r):
     setBrush(QColor(153,102,204));
     setPos(x, y);
     srand(time(0));
-    _currentVelocity = new V2(pow(-1, (rand() % 2)), 6);
+    _currentVelocity = new V2(pow(-1, (rand() % 2))*2, 5);
 }
 
 

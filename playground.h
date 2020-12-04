@@ -16,6 +16,9 @@ class Playground : public QGraphicsView
         void timerEvent(QTimerEvent*event);
         QVector<BorderLine*> getBorders()const{return _borders;}
         ~Playground()=default;
+    protected:
+        void gameOver();
+        void newGame();
     private:
         QGraphicsScene _scene;
         Platform* _leftPlatform;
@@ -23,6 +26,7 @@ class Playground : public QGraphicsView
         GeneralRect* _volleyballNet;
         QVector<BorderLine*> _borders;
         Ball* _ball;
+        bool waiting;
 };
 
 #endif // PLAYGROUND_H
