@@ -2,6 +2,7 @@
 #include "playgrounditems.h"
 #include <iostream>
 #include <cmath>
+#include <set>
 #include <QTest>
 Playground::Playground(QWidget* parent)
     : QGraphicsView(parent)
@@ -171,17 +172,72 @@ void Playground::timerEvent(QTimerEvent* event){
 */
 
     QList<QGraphicsItem*> collideWith = _ball->collidingItems();
-    for(auto* item: collideWith){
-        BorderLine* p1 = dynamic_cast<BorderLine*>(item);
-        GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
-        if(p2 && _ball->isInteracted(p2)){
-            _ball->collProcess(p2);
+    if(collideWith.empty()){
+        _ball->move();
+    }
+    else if(collideWith.size() == 1){
+        for(auto* item: collideWith){
+            BorderLine* p1 = dynamic_cast<BorderLine*>(item);
+            GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
+            if(p2 && collideWith.size() == 1){
+                _ball->collProcess(p2);
+            }
+            else if(p1 && collideWith.size() == 1){
+                _ball->collProcess(p1);
+            }
         }
-        else if(p1 && _ball->isInteracted(p1)){
-            _ball->collProcess(p1);
+        _ball->move();
+    }
+    else{
+        std::set<BorderLine*> borders_collied;
+        std::set<GeneralRect*> rects_collied;
+        for(auto* item: collideWith){
+            BorderLine* p1 = dynamic_cast<BorderLine*>(item);
+            GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
+            if(p2){
+                rects_collied.insert(p2);
+            }
+
+            if(p1){
+                borders_collied.insert(p1);
+            }
+        }
+        bool processed = false;
+        for(auto* item: rects_collied){
+            if(_ball->isInteracted(item)){
+                processed = true;
+                _ball->collProcess(item);
+                break;
+            }
+        }
+        if(processed)
+            return;
+        for(auto* item: borders_collied){
+            if(_ball->isInteracted(item)){
+                processed = true;
+                _ball->collProcess(item);
+                break;
+            }
         }
     }
-    _ball->move();
+
+//    for(auto* item: collideWith){
+//        BorderLine* p1 = dynamic_cast<BorderLine*>(item);
+//        GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
+//        if(p2 && _ball->isInteracted(p2) && collideWith.size() > 1){
+//             _ball->collProcess(p2);
+//        }
+//        else if(p2 && collideWith.size() == 1){
+//            _ball->collProcess(p2);
+//        }
+//        else if(p1 && _ball->isInteracted(p1)){
+//            _ball->collProcess(p1);
+//        }
+//        else if(p1 && collideWith.size() == 1){
+//            _ball->collProcess(p1);
+//        }
+//    }
+//    _ball->move();
 }
 
 void Playground::gameOver(){
