@@ -128,7 +128,7 @@ void Playground::keyPressEvent(QKeyEvent *e){
 
 void Playground::timerEvent(QTimerEvent* event){
     Q_UNUSED(event);
-    if(waiting){
+    /*if(waiting){
         waiting = false;
         QTest::qSleep(4000);
         newGame();
@@ -168,7 +168,20 @@ void Playground::timerEvent(QTimerEvent* event){
         }
         _ball->move();
     }
+*/
 
+    QList<QGraphicsItem*> collideWith = _ball->collidingItems();
+    for(auto* item: collideWith){
+        BorderLine* p1 = dynamic_cast<BorderLine*>(item);
+        GeneralRect* p2 = dynamic_cast<GeneralRect*>(item);
+        if(p2 && _ball->isInteracted(p2)){
+            _ball->collProcess(p2);
+        }
+        else if(p1 && _ball->isInteracted(p1)){
+            _ball->collProcess(p1);
+        }
+    }
+    _ball->move();
 }
 
 void Playground::gameOver(){

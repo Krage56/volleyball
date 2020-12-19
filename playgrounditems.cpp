@@ -188,7 +188,7 @@ bool Ball::isInteracted(QGraphicsItem* obj) const{
             Platform* p = dynamic_cast<Platform*>(obj);
             QPointF delta(_x - p->getCoords().x(), _y - p->getCoords().y());
             //Мяч над платформой
-            if(_y + _r < p->getCoords().y() - p->h()/2){
+            if(_y + _r < p->getCoords().y() /*- p->h()/2*/){
                 if(delta.y()*_currentVelocity->y() < 0){
                     return true;
                 }
