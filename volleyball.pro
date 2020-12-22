@@ -1,8 +1,8 @@
-QT       += core gui
+QT       += core gui testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11
+CONFIG += c++14
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -10,12 +10,18 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    #volleyball.cpp
+    playground.cpp \
+    playgrounditems.cpp \
+    v2.cpp
 
 HEADERS += \
-    #volleyball.h
+    playground.h \
+    playgrounditems.h \
+    v2.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+FORMS +=
