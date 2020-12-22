@@ -1,7 +1,5 @@
 #include "v2.h"
 #include <cmath>
-#include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 V2::V2()
@@ -27,7 +25,6 @@ double V2::len()const{
 
 const V2& V2::normalize(){
     if(!operator bool()){
-        std::cout << v[0] << " " << v[1] << std::endl << std::flush;
         throw std::runtime_error("normalize() for trivial V2 called");
     }
 

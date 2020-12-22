@@ -45,12 +45,8 @@ BorderLine::BorderLine(std::pair<qreal, qreal> p1, std::pair<qreal, qreal> p2, B
     setPen(QPen(QColor(Qt::red)));
     setPos(mapToScene(0,0));
     _kind = kind;
-    _centralPoint = QPointF(p2.first - p1.first, p2.second - p1.second);
 }
 
-QPointF BorderLine::getPointF()const{
-    return _centralPoint;
-}
 
 bool Platform::moveAcces(int key, const QPointF& currentCoords, Ball* ball, int top,
                          int left, int bottom, int right, int step)const{
@@ -151,7 +147,6 @@ V2 Ball::collProcess(GeneralRect* rect){
         newVelocity->normalize();
     }
     else{
-        //std:: cout << _y << " " << rect->h() << std::endl << std::flush;
         if(_y < rect->h()/2){
             newVelocity = new V2(_x - rect->x(), _y - rect->y());
             newVelocity->normalize();
@@ -165,68 +160,3 @@ V2 Ball::collProcess(GeneralRect* rect){
     _currentVelocity = newVelocity;
     return *newVelocity;
 }
-
-bool Ball::isInteracted(QGraphicsItem* obj) const{
-    if(dynamic_cast<BorderLine*>(obj)){
-        BorderLine* border = dynamic_cast<BorderLine*>(obj);
-        QPointF dest(_x + _currentVelocity->x(), _y + _currentVelocity->y());
-        if(border->getKind() == Borders::top && dest.y() < border->getPointF().y()){
-            return true;
-        }
-        if(border->getKind() == Borders::bottom && dest.y() > border->getPointF().y()){
-            return true;
-        }
-        if(border->getKind() == Borders::left && dest.x() < border->getPointF().x()){
-            return true;
-        }
-        if(border->getKind() == Borders::right && dest.x() > border->getPointF().x()){
-            return true;
-        }
-    }
-    else if(dynamic_cast<GeneralRect*>(obj)){
-        if(dynamic_cast<Platform*>(obj)){
-            Platform* p = dynamic_cast<Platform*>(obj);
-            QPointF delta(_x - p->getCoords().x(), _y - p->getCoords().y());
-            //Мяч над платформой
-            if(_y + _r < p->getCoords().y() - p->h()/2){
-                if(delta.y()*_currentVelocity->y() < 0){
-                    return true;
-                }
-            }
-            //Мяч под платформой
-            else if(_y - _r > p->getCoords().y() + p->h()/2){
-                if(delta.y()*_currentVelocity->y() < 0){
-                    return true;
-                }
-            }
-            //Мяч слева
-            else if(_x + _r > p->getCoords().x() - p->w()/2){
-                if(delta.x()*_currentVelocity->x() < 0){
-                    return true;
-                }
-            }
-            //Мяч справа
-            else if(_x - _r > p->getCoords().x() + p->w()/2){
-                if(delta.x()*_currentVelocity->x() < 0){
-                    return true;
-                }
-            }
-        }
-        else{
-            GeneralRect* rect = dynamic_cast<GeneralRect*>(obj);
-            QPointF delta(_x - rect->getCoords().x(), _y - rect->getCoords().y());
-            if(_y < rect->getCoords().y()){
-                if(delta.y()*(_currentVelocity->y()) > 0){
-                    return true;
-                }
-            }
-            else{
-                if(delta.x()*(_currentVelocity->x()) > 0){
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-

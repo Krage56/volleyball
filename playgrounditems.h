@@ -27,10 +27,8 @@ enum class Borders{
 };
 class BorderLine: public QGraphicsLineItem{
     Borders _kind;
-    QPointF _centralPoint;
     public:
         BorderLine(std::pair<qreal, qreal>, std::pair<qreal, qreal>, Borders);
-        QPointF getPointF()const;
         Borders getKind()const{return _kind;}
         ~BorderLine()=default;
 };
@@ -53,9 +51,6 @@ class Ball: public QGraphicsEllipseItem{
         V2 collProcess(BorderLine* border);
         //Возвращает радиус мячика
         int r()const{return _r;}
-        //Взаимодействует ли данный объект с мячиком
-        //Гарантировано работает только для соприкасающихся объектов
-        bool isInteracted(QGraphicsItem* obj) const;
         ~Ball();
     protected:
         //Обёртка над setPos()

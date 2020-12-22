@@ -1,7 +1,4 @@
 #include "playground.h"
-#include "playgrounditems.h"
-#include <iostream>
-#include <cmath>
 #include <QTest>
 Playground::Playground(QWidget* parent)
     : QGraphicsView(parent)
@@ -32,15 +29,12 @@ Playground::Playground(QWidget* parent)
     _scene.addItem(ball);
     _ball = ball;
 
-    _borders.push_back(new BorderLine(std::make_pair(0,0), std::make_pair(_scene.width(), 0), Borders::top));
-    _borders.push_back(new BorderLine(std::make_pair(0,_scene.height()), std::make_pair(0, 0), Borders::left));
-    _borders.push_back(new BorderLine(std::make_pair(0,_scene.height()),
+     _scene.addItem(new BorderLine(std::make_pair(0,0), std::make_pair(_scene.width(), 0), Borders::top));
+     _scene.addItem(new BorderLine(std::make_pair(0,_scene.height()), std::make_pair(0, 0), Borders::left));
+     _scene.addItem(new BorderLine(std::make_pair(0,_scene.height()),
                                       std::make_pair(_scene.width(), _scene.height()), Borders::bottom));
-    _borders.push_back(new BorderLine(std::make_pair(_scene.width(), _scene.height()),
+     _scene.addItem(new BorderLine(std::make_pair(_scene.width(), _scene.height()),
                                       std::make_pair(_scene.width(), 0), Borders::right));
-    for(auto* el: _borders){
-        _scene.addItem(el);
-    }
 
     const int _volleyballNetH = 450, _volleyballNetW = 20;
 
@@ -49,7 +43,6 @@ Playground::Playground(QWidget* parent)
                                      _volleyballNetW, _volleyballNetH, QPen(Qt::black), QBrush(Qt::black));
     _scene.addItem(_volleyballNet);
 
-    //std::cout << _volleyballNet->getCoords().x() << std::flush;
     waiting = false;
     startTimer(50);
 }
@@ -60,7 +53,8 @@ void Playground::keyPressEvent(QKeyEvent *e){
     top = _scene.sceneRect().top();
     int left = 0,
     right = _scene.sceneRect().right();
-    //std::cout << "I was in key event\n" << std::flush;
+    if(!_leftPlatform || !_rightPlatform)
+        return;
     if((e->key() == Qt::Key_W || e->key() == 1062)){
         QPointF currentCoords = _leftPlatform->getCoords();
 
@@ -153,7 +147,7 @@ void Playground::timerEvent(QTimerEvent* event){
             }
         }
     }
-    //Мяч взаимодействует соприкасается с одним объектом
+    //Мяч свободен от земных оков, от зла и от добра...
     if(collideWith.empty()){
         _ball->move();
     }
